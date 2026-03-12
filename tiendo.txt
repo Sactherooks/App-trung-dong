@@ -1,0 +1,6 @@
+Tính năng nào đã hoàn thành trong buổi hôm nay?
+=> chưa hoàn thành tính năng nào nhưng đã tải được pygame, tạo khung code và background đã hoàn thành được 50% và có thể import lên được sau khi hoàn thành
+Khó khăn nào nhóm đang gặp phải?
+=> code chưa hoạt động tốt và khó khăn khi dùng git hub để share code
+Tuần tới nhóm dự định làm gì?
+=> khắc phục những khó khăn trên và bắt đầu code di chuyển nếu được thì sẽ bắt đầu code obstacle
