@@ -15,7 +15,6 @@ If those are missing, the game will render simple shapes instead.
 import random
 import sys
 import pygame
-<<<<<<< Updated upstream
 
 # ---- Config ----
 # Feel free to adjust these for a bigger / smaller window.
@@ -66,7 +65,7 @@ class Player:
         self.parry_timer = 0
         self.parry_cooldown = 0
 
-        self.image = try_load_image("background.png", (self.width, self.height))
+        self.image = try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/mc.gif", (self.width, self.height))
         if self.image is None:
             self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             pygame.draw.rect(self.image, (20, 120, 20), (0, 0, self.width, self.height), border_radius=8)
@@ -160,7 +159,7 @@ class Projectile:
         # While False, we show a warning arrow at the screen edge.
         self.entered = False
 
-        self.image = try_load_image("projectile.png", (self.width, self.height))
+        self.image = try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/Fiery katana with ethereal aura.png", (self.width, self.height))
         if self.image is None:
             self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             pygame.draw.polygon(
@@ -254,7 +253,7 @@ def main():
     clock = pygame.time.Clock()
 
     # Background
-    bg_image = try_load_image("background.png", (SCREEN_WIDTH, SCREEN_HEIGHT))
+    bg_image = try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/Không-Có-Tiêu-Đề244.png", (SCREEN_WIDTH, SCREEN_HEIGHT))
     if bg_image is None:
         # fallback to a gradient background
         bg_image = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -365,7 +364,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-=======
+
 from pygame.locals import *
 pygame.init()
 screen_width = 1000
@@ -374,4 +373,4 @@ screen = pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption('ehehhehehh')
 title_size = 50
 bg_image = pygame.image.load('')
->>>>>>> Stashed changes
+
