@@ -48,11 +48,11 @@ def try_load_image(path, size=None):
 
 class Player:
     def __init__(self, screen_rect):
-        self.width = 30
-        self.height = 165
+        self.width = 90
+        self.height = 90
         self.rect = pygame.Rect(
             screen_rect.centerx - self.width // 2,
-            screen_rect.bottom - self.height - 24,
+            screen_rect.bottom - self.height,
             self.width,
             self.height,
         )
