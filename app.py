@@ -48,11 +48,11 @@ def try_load_image(path, size=None):
 
 class Player:
     def __init__(self, screen_rect):
-        self.width = 90
-        self.height = 90
+        self.width = 100
+        self.height = 100
         self.rect = pygame.Rect(
             screen_rect.centerx - self.width // 2,
-            screen_rect.bottom - self.height,
+            screen_rect.bottom - self.height - 120,
             self.width,
             self.height,
         )
@@ -65,10 +65,10 @@ class Player:
         self.parry_timer = 0
         self.parry_cooldown = 0
 
-        self.image = try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/mc.gif", (self.width, self.height))
+        self.image = try_load_image("player.png", (self.width, self.height))
         if self.image is None:
             self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-            pygame.draw.rect(self.image, (20, 120, 20), (0, 0, self.width, self.height), border_radius=8)
+            pygame.draw.rect(self.image, (20, 120, 20), (0, 0, self.width, self.height), border_radius=10)
             pygame.draw.circle(self.image, (200, 200, 70), (self.width // 2, self.height // 2), 12)
 
     def update(self, keys, screen_rect, dt):
@@ -121,7 +121,7 @@ class Player:
 
 class Projectile:
     def __init__(self, screen_rect, speed):
-        self.width = 10
+        self.width = 70
         self.height = 70
         self.speed = speed
 
@@ -164,7 +164,7 @@ class Projectile:
             self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             pygame.draw.polygon(
                 self.image,
-                (200, 50, 50),
+                (100, 10, 10),
                 [
                     (self.width / 2, 0),
                     (self.width, self.height),
