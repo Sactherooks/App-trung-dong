@@ -473,7 +473,7 @@ def main():
         if current_item:
             current_item.draw(screen)
 
-        draw_text(screen, f"Score: {int(score)}", 26, 12, 10)
+        draw_text(screen, f"Score: {int(score)}", 26, screen_rect.centerx - 60, 10)
         if not game_over:
             if player.parry_cooldown > 0:
                 draw_text(screen, f"Parry CD: {int(player.parry_cooldown)}ms", 22, 12, 40)
@@ -482,6 +482,7 @@ def main():
             draw_text(screen, "Jump: UP / W", 22, 12, 64)
 
         if game_over:
+            draw_text(screen, f"Score: {int(score)}", 36, screen_rect.centerx - 80, screen_rect.centery + 40,(255, 220, 0))
             draw_text(screen, "GAME OVER", 64, screen_rect.centerx - 190, screen_rect.centery - 70, (230, 50, 50))
             draw_text(screen, "Press R to restart", 28, screen_rect.centerx - 140, screen_rect.centery + 10, (240, 240, 240))
 
