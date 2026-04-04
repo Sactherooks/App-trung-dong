@@ -482,9 +482,9 @@ def main():
             draw_text(screen, "Jump: UP / W", 22, 12, 64)
 
         if game_over:
-            draw_text(screen, f"Score: {int(score)}", 36, screen_rect.centerx - 80, screen_rect.centery + 40,(255, 220, 0))
-            draw_text(screen, "GAME OVER", 64, screen_rect.centerx - 190, screen_rect.centery - 70, (230, 50, 50))
-            draw_text(screen, "Press R to restart", 28, screen_rect.centerx - 140, screen_rect.centery + 10, (240, 240, 240))
+            draw_text(screen, f"Score: {int(score)}", 36, screen_rect.centerx - 70, screen_rect.centery + 50,(255, 220, 0))
+            draw_text(screen, "GAME OVER", 64, screen_rect.centerx - 160, screen_rect.centery - 70, (230, 50, 50))
+            draw_text(screen, "Press R to restart", 28, screen_rect.centerx - 110, screen_rect.centery + 10, (240, 240, 240))
 
         pygame.display.flip()
 
