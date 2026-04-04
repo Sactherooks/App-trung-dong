@@ -33,6 +33,10 @@ PROJECTILE_SPEED_START = 2.5
 PROJECTILE_ACCELERATION = 0.05  # increases over time (speed only)
 PROJECTILE_SPAWN_TIME = 1100  # ms (fixed - fewer projectiles, easier)
 
+ITEM_SPAWN_TIME = 10000  # ms xuất hiện item (10 giây)
+ITEM_DURATION = 3000     # ms bất tử sau khi nhặt
+ANIM_FRAME_SPEED = 100   # ms mỗi frame animation
+
 # ---- Helpers ----
 
 def try_load_image(path, size=None):
@@ -48,8 +52,9 @@ def try_load_image(path, size=None):
 
 class Player:
     def __init__(self, screen_rect):
-        self.width = 100
-        self.height = 100
+        self.width = 250
+        self.height = 250
+        
         self.rect = pygame.Rect(
             screen_rect.centerx - self.width // 2,
             screen_rect.bottom - self.height - 120,
@@ -65,11 +70,28 @@ class Player:
         self.parry_timer = 0
         self.parry_cooldown = 0
 
-        self.image = try_load_image("player.png", (self.width, self.height))
-        if self.image is None:
-            self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-            pygame.draw.rect(self.image, (20, 120, 20), (0, 0, self.width, self.height), border_radius=10)
-            pygame.draw.circle(self.image, (200, 200, 70), (self.width // 2, self.height // 2), 12)
+        self.image_idle = try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/mc_normal.png", (self.width, self.height))
+        self.frames = [
+            try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề9_20260402131643.png", (self.width, self.height)),
+            try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề9_20260402131649.png", (self.width, self.height)),
+        ]
+        self.image_parry = try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề51_20260402134240.png", (self.width, self.height))
+        if self.image_parry is None:
+            self.image_parry = fallback
+        # fallback
+        fallback = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        pygame.draw.rect(fallback, (20, 120, 20), (0, 0, self.width, self.height), border_radius=10)
+        if self.image_idle is None:
+            self.image_idle = fallback
+        for i in range(len(self.frames)):
+            if self.frames[i] is None:
+                self.frames[i] = fallback
+
+        self.image = self.image_idle
+        self.anim_index = 0
+        self.anim_timer = 0
+        self.anim_speed = 150  # ms mỗi frame
+        
 
     def update(self, keys, screen_rect, dt):
         dx = 0
@@ -110,6 +132,22 @@ class Player:
             self.parry_active = True
             self.parry_timer = PARRY_DURATION
             self.parry_cooldown = PARRY_COOLDOWN
+            
+        is_moving = keys[pygame.K_LEFT] or keys[pygame.K_a] or keys[pygame.K_RIGHT] or keys[pygame.K_d]
+
+        if self.parry_active:
+            self.image = self.image_parry
+        elif is_moving:
+            self.anim_timer += dt
+            if self.anim_timer >= self.anim_speed:
+                self.anim_timer = 0
+                self.anim_index = (self.anim_index + 1) % len(self.frames)
+            self.image = self.frames[self.anim_index]
+        else:
+            self.anim_index = 0
+            self.anim_timer = 0
+            self.image = self.image_idle
+        
 
     def draw(self, surf):
         if self.parry_active:
@@ -121,8 +159,8 @@ class Player:
 
 class Projectile:
     def __init__(self, screen_rect, speed):
-        self.width = 70
-        self.height = 70
+        self.width = 150
+        self.height = 150
         self.speed = speed
 
         # Decide which edge this projectile comes from
@@ -143,16 +181,19 @@ class Projectile:
             self.y = screen_rect.bottom + 10
             self.vx = 0
             self.vy = -self.speed
+            self.angle = 180
         elif self.direction == "left":
             self.x = screen_rect.left - self.width - 10
             self.y = random.randint(screen_rect.top + 16, screen_rect.bottom - 16 - self.height)
             self.vx = self.speed
             self.vy = 0
+            self.angle = 90
         else:  # right
             self.x = screen_rect.right + 10
             self.y = random.randint(screen_rect.top + 16, screen_rect.bottom - 16 - self.height)
             self.vx = -self.speed
             self.vy = 0
+            self.angle = 270
 
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         # Flag to mark when the projectile has entered the visible play area.
@@ -190,8 +231,31 @@ class Projectile:
         )
 
     def draw(self, surf):
-        surf.blit(self.image, self.rect)
+        rotated = pygame.transform.rotate(self.image, self.angle)
+        rect = rotated.get_rect(center=self.rect.center)
+        surf.blit(rotated, rect)
 
+class Item:
+    def __init__(self, screen_rect):
+        self.width = 100
+        self.height = 100
+        self.rect = pygame.Rect(
+            random.randint(100, screen_rect.right - 100),
+            screen_rect.bottom - self.height - 150,
+            self.width,
+            self.height,
+        )
+        self.image = try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/baogay.png", (self.width, self.height))
+        if self.image is None:
+            self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            pygame.draw.circle(self.image, (255, 220, 0), (self.width//2, self.height//2), self.width//2)
+        # Hiệu ứng nháy
+        self.blink_timer = 0
+
+    def draw(self, surf):
+        self.blink_timer += 1
+        if (self.blink_timer // 15) % 2 == 0:
+            surf.blit(self.image, self.rect)
 
 def draw_text(surf, text, size, x, y, color=(255, 255, 255)):
     font = pygame.font.SysFont("arial", size, bold=True)
@@ -251,7 +315,7 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Ancient China Evade")
     clock = pygame.time.Clock()
-
+    
     # Background
     bg_image = try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/Không-Có-Tiêu-Đề244.png", (SCREEN_WIDTH, SCREEN_HEIGHT))
     if bg_image is None:
@@ -275,7 +339,26 @@ def main():
     projectile_speed = PROJECTILE_SPEED_START
     spawn_timer = 0
     spawn_interval = PROJECTILE_SPAWN_TIME
-
+    
+    item_timer = 0
+    current_item = None
+    invincible = False
+    invincible_timer = 0
+    anim_frames = [
+        try_load_image(f"C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề48_20260402131904.png", (SCREEN_WIDTH, SCREEN_HEIGHT)),
+        try_load_image(f"C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề48_20260402131946.png", (SCREEN_WIDTH, SCREEN_HEIGHT)),
+        try_load_image(f"C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề48_20260402131950.png", (SCREEN_WIDTH, SCREEN_HEIGHT)),
+        try_load_image(f"C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề48_20260402131954.png", (SCREEN_WIDTH, SCREEN_HEIGHT)),
+        try_load_image(f"C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề48_20260402131958.png", (SCREEN_WIDTH, SCREEN_HEIGHT)),
+        try_load_image(f"C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề48_20260402132001.png", (SCREEN_WIDTH, SCREEN_HEIGHT)),
+        try_load_image(f"C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề48_20260402132004.png", (SCREEN_WIDTH, SCREEN_HEIGHT)),
+        try_load_image(f"C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề48_20260402132007.png", (SCREEN_WIDTH, SCREEN_HEIGHT)),
+        try_load_image(f"C:/Users/TBL/Documents/GitHub/App-trung-dong/Không Có Tiêu Đề48_20260402132010.png", (SCREEN_WIDTH, SCREEN_HEIGHT)),
+    ]
+    anim_index = 0
+    anim_timer = 0
+    playing_anim = False
+    
     # Main game loop
     # - process input
     # - update game state (player, projectiles, score)
@@ -283,9 +366,35 @@ def main():
     while running:
         dt = clock.tick(FPS)
         spawn_timer += dt
+
         if not game_over:
             score += dt / 1000
             projectile_speed += PROJECTILE_ACCELERATION * (dt / 1000)
+            # Spawn item
+            item_timer += dt
+            if item_timer >= ITEM_SPAWN_TIME and current_item is None and not invincible:
+                item_timer = 0
+                current_item = Item(screen_rect)
+
+            # Bất tử timer
+            if invincible:
+                invincible_timer -= dt
+                anim_timer += dt
+                if anim_timer >= ANIM_FRAME_SPEED:
+                    anim_timer = 0
+                    anim_index = (anim_index + 1) % len(anim_frames)
+                if invincible_timer <= 0:
+                    invincible = False
+                    playing_anim = False
+
+            # Nhặt item
+            if current_item and player.rect.colliderect(current_item.rect):
+                current_item = None
+                invincible = True
+                invincible_timer = ITEM_DURATION
+                playing_anim = True
+                anim_index = 0
+                anim_timer = 0
             # Keep spawn timing fixed; difficulty comes only from speed.
 
         for event in pygame.event.get():
@@ -302,16 +411,23 @@ def main():
                     spawn_timer = 0
                     game_over = False
                     player.rect.centerx = screen_rect.centerx
+                    item_timer = 0         
+                    current_item = None    
+                    invincible = False     
+                    invincible_timer = 0   
+                    playing_anim = False   
 
         keys = pygame.key.get_pressed()
-
+        
+        screen.blit(bg_image, (0, 0))
+        
         if not game_over:
             player.update(keys, screen_rect, dt)
 
             if spawn_timer >= spawn_interval:
                 spawn_timer = 0
                 projectiles.append(Projectile(screen_rect, projectile_speed))
-
+            
             for p in projectiles:
                 p.update(screen_rect)
 
@@ -320,17 +436,20 @@ def main():
 
             # collision + parry
             for p in projectiles[:]:
-                if p.rect.colliderect(player.rect):
-                    if player.parry_active:
+                player_center = pygame.Rect(
+                    player.rect.centerx - 5,
+                    player.rect.centery - 80,
+                    10,
+                    160
+                )
+                if p.rect.colliderect(player_center):
+                    if player.parry_active or invincible:  # ← thêm invincible
                         projectiles.remove(p)
                         score += 1
                         continue
                     game_over = True
                     break
-
-        # render
-        screen.blit(bg_image, (0, 0))
-
+                
         # indicate incoming threats at the point where they will enter
         for p in projectiles:
             if not p.entered:
@@ -342,7 +461,16 @@ def main():
         for p in projectiles:
             p.draw(screen)
 
-        player.draw(screen)
+        if not playing_anim:
+            player.draw(screen)
+        
+        # Animation toàn màn hình khi bất tử
+        if playing_anim and anim_frames[anim_index]:
+            screen.blit(anim_frames[anim_index], (0, 0))
+
+        # Vẽ item
+        if current_item:
+            current_item.draw(screen)
 
         draw_text(screen, f"Score: {int(score)}", 26, 12, 10)
         if not game_over:
