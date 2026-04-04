@@ -176,6 +176,7 @@ class Projectile:
             self.y = screen_rect.top - self.height - 10
             self.vx = 0
             self.vy = self.speed
+            self.angle = 0
         elif self.direction == "bottom":
             self.x = random.randint(screen_rect.left + 16, screen_rect.right - 16 - self.width)
             self.y = screen_rect.bottom + 10
