@@ -387,7 +387,8 @@ def main():
                 if invincible_timer <= 0:
                     invincible = False
                     playing_anim = False
-
+            
+            
             # Nhặt item
             if current_item and player.rect.colliderect(current_item.rect):
                 current_item = None
@@ -396,6 +397,7 @@ def main():
                 playing_anim = True
                 anim_index = 0
                 anim_timer = 0
+                voice_sound.play()
             # Keep spawn timing fixed; difficulty comes only from speed.
 
         for event in pygame.event.get():
@@ -497,10 +499,11 @@ if __name__ == "__main__":
 
 from pygame.locals import *
 pygame.init()
+pygame.mixer.init()
+voice_sound = pygame.mixer.Sound("C:/Users/TBL/Documents/GitHub/App-trung-dong/Thoại-260402_175139.mp3")
 screen_width = 1000
 screen_height = 1000
 screen = pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption('ehehhehehh')
 title_size = 50
 bg_image = pygame.image.load('')
-
