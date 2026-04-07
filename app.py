@@ -35,7 +35,7 @@ PROJECTILE_SPAWN_TIME = 1100  # ms (fixed - fewer projectiles, easier)
 
 ITEM_SPAWN_TIME = 10000  # ms xuất hiện item (10 giây)
 ITEM_DURATION = 3000     # ms bất tử sau khi nhặt
-ANIM_FRAME_SPEED = 100   # ms mỗi frame animation
+ANIM_FRAME_SPEED = 333   # ms mỗi frame animation
 
 # ---- Helpers ----
 
@@ -313,10 +313,14 @@ def draw_warning(surf, direction, screen_rect, pos):
 
 def main():
     pygame.init()
+    pygame.mixer.init()
+    voice_sound = pygame.mixer.Sound("C:/Users/TBL/Documents/GitHub/App-trung-dong/Thoại-260402_175139.mp3")
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Ancient China Evade")
     clock = pygame.time.Clock()
-    
+    pygame.mixer.init()
+    pygame.mixer.music.load("C:/Users/TBL/Documents/GitHub/App-trung-dong/videoplayback.mp3")
+    pygame.mixer.music.play(-1)
     # Background
     bg_image = try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/Không-Có-Tiêu-Đề244.png", (SCREEN_WIDTH, SCREEN_HEIGHT))
     if bg_image is None:
@@ -397,7 +401,7 @@ def main():
                 playing_anim = True
                 anim_index = 0
                 anim_timer = 0
-                # voice_sound.play()
+                voice_sound.play()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -498,8 +502,6 @@ if __name__ == "__main__":
 
 from pygame.locals import *
 pygame.init()
-pygame.mixer.init()
-# voice_sound = pygame.mixer.Sound("C:/Users/TBL/Documents/GitHub/App-trung-dong/Thoại-260402_175139.mp3")
 screen_width = 1000
 screen_height = 1000
 screen = pygame.display.set_mode((screen_width,screen_height))
