@@ -315,11 +315,13 @@ def main():
     pygame.init()
     pygame.mixer.init()
     voice_sound = pygame.mixer.Sound("C:/Users/TBL/Documents/GitHub/App-trung-dong/Thoại-260402_175139.mp3")
+    voice_sound.set_volume(1.0)
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Ancient China Evade")
     clock = pygame.time.Clock()
     pygame.mixer.init()
     pygame.mixer.music.load("C:/Users/TBL/Documents/GitHub/App-trung-dong/videoplayback.mp3")
+    pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)
     # Background
     bg_image = try_load_image("C:/Users/TBL/Documents/GitHub/App-trung-dong/Không-Có-Tiêu-Đề244.png", (SCREEN_WIDTH, SCREEN_HEIGHT))
