@@ -57,7 +57,7 @@ CHARACTERS = [
     {
         "id": "archer",
         "name": "Liu Xuanji",
-        "desc": "Cloaked in crimson, she bends ancient talismans to her wil",
+        "desc": "Cloaked in crimson, she bends ancient talismans to her will",
         "color": (20, 60, 160),
         "idle":   ASSET_PATH + "nv2/Đứng.png",
         "walk":  [ASSET_PATH + "nv2/Không Có Tiêu Đề75_20260509092648.png", ASSET_PATH + "nv2/Không Có Tiêu Đề75_20260509092652.png", ASSET_PATH + "nv2/Không Có Tiêu Đề75_20260509092657.png", ASSET_PATH + "nv2/Không Có Tiêu Đề75_20260509092708.png", ASSET_PATH + "nv2/Không Có Tiêu Đề75_20260509092724.png"],
