@@ -400,7 +400,6 @@ class Player:
             pygame.draw.ellipse(glow, (120, 200, 255, 140), glow.get_rect())
             surf.blit(glow, (self.rect.x - 7, self.rect.y - 7))
         surf.blit(self.image, self.rect)
-
  
  
 # ================================================================
