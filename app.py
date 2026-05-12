@@ -31,8 +31,8 @@ ASSET_PATH = "C:/Users/TBL/Documents/GitHub/App-trung-dong/"
 CHARACTERS = [
     {
         "id": "hero",
-        "name": "Nhà Tu Hành",
-        "desc": "Chiến binh cân bằng, dễ chơi.",
+        "name": "Monk",
+        "desc": "Balanced warrior, easy to play.",
         "color": (20, 120, 20),          # màu fallback
         "idle":   ASSET_PATH + "mc_normal.png",
         "walk":  [
@@ -56,8 +56,8 @@ CHARACTERS = [
     # nhân vật 2
     {
         "id": "archer",
-        "name": "Cung Thủ",
-        "desc": "Linh hoạt, tốc độ cao.",
+        "name": "Liu Xuanji",
+        "desc": "Cloaked in crimson, she bends ancient talismans to her wil",
         "color": (20, 60, 160),
         "idle":   ASSET_PATH + "nv2/Đứng.png",
         "walk":  [ASSET_PATH + "nv2/Không Có Tiêu Đề75_20260509092648.png", ASSET_PATH + "nv2/Không Có Tiêu Đề75_20260509092652.png", ASSET_PATH + "nv2/Không Có Tiêu Đề75_20260509092657.png", ASSET_PATH + "nv2/Không Có Tiêu Đề75_20260509092708.png", ASSET_PATH + "nv2/Không Có Tiêu Đề75_20260509092724.png"],
@@ -95,7 +95,31 @@ CHARACTERS = [
     # },
 ]
  
- 
+# ---- Danh sách background ----
+BACKGROUNDS = [
+    {
+        "id": "bg1",
+        "name": "Elysium of Cherry Blossoms",
+        "desc": "Where talismans slumber beneath fallen cherry blossoms.",
+        "file": ASSET_PATH + "Background.png",
+        "thumb": ASSET_PATH + "Background.png",   # ảnh thu nhỏ trong màn chọn
+    },
+    {
+        "id": "bg2",
+        "name": "Abyss of the Forgotten Shrine",
+        "desc": "An abyss of cursed talismans beneath the watch of forgotten gods",
+        "file": ASSET_PATH + "bg phật.png",
+        "thumb": ASSET_PATH + "bg phật.png",
+    },
+    {
+        "id": "bg3",
+        "name": "The Glory of Crimson Banner",
+        "desc": "Where burning warships drift beneath the empire’s dying sun",
+        "file": ASSET_PATH + "bg thuyền.png",
+        "thumb": ASSET_PATH + "bg thuyền.png",
+    },
+]
+
 # ---- Helpers ----
  
 def try_load_image(path, size=None):
@@ -106,7 +130,6 @@ def try_load_image(path, size=None):
         return img
     except Exception:
         return None
- 
  
 def draw_text(surf, text, size, x, y, color=(255, 255, 255), font_name="arial"):
     font = pygame.font.SysFont(font_name, size, bold=True)
@@ -232,7 +255,7 @@ class CharacterSelectScreen:
         if selected:
             badge_y = rect.bottom - 52
             pygame.draw.rect(self.screen, (200, 160, 20), (rect.x + 60, badge_y, self.CARD_W - 120, 36), border_radius=8)
-            draw_text_centered(self.screen, "▶  CHỌN NHÂN VẬT NÀY", 18, rect.centerx, badge_y + 9,
+            draw_text_centered(self.screen, "CHOOSE THIS CHARACTER", 18, rect.centerx, badge_y + 9,
                                color=(30, 20, 5))
  
         if not selected:
@@ -282,9 +305,9 @@ class CharacterSelectScreen:
             self._draw_particles()
  
             # Tiêu đề
-            draw_text_centered(self.screen, "⚔  CHỌN NHÂN VẬT  ⚔", 52,
+            draw_text_centered(self.screen, "⚔  CHOOSE YOUR CHARACTER  ⚔", 52,
                                self.screen_rect.centerx, 60, color=(255, 210, 60))
-            draw_text_centered(self.screen, "← → để chuyển   •   ENTER hoặc Click để xác nhận",
+            draw_text_centered(self.screen, "A W D to move   •   ENTER or Click to choose",
                                22, self.screen_rect.centerx, 128, color=(200, 180, 130))
  
             # Các card nhân vật
@@ -292,12 +315,171 @@ class CharacterSelectScreen:
                 self._draw_card(i, rect, i == self.selected)
  
             # Hướng dẫn phím dưới cùng
-            draw_text_centered(self.screen, "ESC – Thoát", 20,
+            draw_text_centered(self.screen, "ESC – ESCAPE", 20,
                                self.screen_rect.centerx, self.screen_rect.bottom - 40,
                                color=(120, 100, 70))
  
             pygame.display.flip()
  
+ 
+ 
+class BackgroundSelectScreen:
+    CARD_W = 400
+    CARD_H = 300
+    CARD_GAP = 60
+    THUMB_SIZE = (360, 200)
+
+    def __init__(self, screen, current_bg_image):
+        self.screen = screen
+        self.current_bg = current_bg_image   # dùng làm nền màn chọn
+        self.screen_rect = screen.get_rect()
+        self.selected = 0
+        self.clock = pygame.time.Clock()
+
+        # Load ảnh thumbnail
+        self.thumbs = []
+        for bg in BACKGROUNDS:
+            img = try_load_image(bg["thumb"], self.THUMB_SIZE)
+            if img is None:
+                img = pygame.Surface(self.THUMB_SIZE, pygame.SRCALPHA)
+                img.fill((40, 40, 60))
+                draw_text_centered(img, bg["name"], 22,
+                                   self.THUMB_SIZE[0] // 2,
+                                   self.THUMB_SIZE[1] // 2 - 15,
+                                   color=(200, 200, 200))
+            self.thumbs.append(img)
+
+        self.dim_overlay = pygame.Surface((self.CARD_W, self.CARD_H), pygame.SRCALPHA)
+        self.dim_overlay.fill((0, 0, 0, 140))
+        self.particles = [self._new_particle() for _ in range(60)]
+
+    def _new_particle(self):
+        return {
+            "x": random.randint(0, self.screen_rect.width),
+            "y": random.randint(0, self.screen_rect.height),
+            "r": random.uniform(1, 3),
+            "speed": random.uniform(0.2, 0.8),
+            "alpha": random.randint(60, 180),
+        }
+
+    def _update_particles(self):
+        for p in self.particles:
+            p["y"] -= p["speed"]
+            if p["y"] < -5:
+                p["x"] = random.randint(0, self.screen_rect.width)
+                p["y"] = self.screen_rect.height + 5
+
+    def _draw_particles(self):
+        for p in self.particles:
+            s = pygame.Surface((int(p["r"] * 2), int(p["r"] * 2)), pygame.SRCALPHA)
+            pygame.draw.circle(s, (255, 220, 120, p["alpha"]),
+                               (int(p["r"]), int(p["r"])), int(p["r"]))
+            self.screen.blit(s, (int(p["x"] - p["r"]), int(p["y"] - p["r"])))
+
+    def _card_rects(self):
+        total_w = len(BACKGROUNDS) * self.CARD_W + (len(BACKGROUNDS) - 1) * self.CARD_GAP
+        start_x = self.screen_rect.centerx - total_w // 2
+        cy = self.screen_rect.centery - self.CARD_H // 2 + 20
+        rects = []
+        for i in range(len(BACKGROUNDS)):
+            x = start_x + i * (self.CARD_W + self.CARD_GAP)
+            rects.append(pygame.Rect(x, cy, self.CARD_W, self.CARD_H))
+        return rects
+
+    def _draw_card(self, idx, rect, selected):
+        bg = BACKGROUNDS[idx]
+        border_color = (255, 210, 60) if selected else (80, 60, 30)
+        border_w = 4 if selected else 2
+
+        # Nền card
+        card_surf = pygame.Surface((self.CARD_W, self.CARD_H), pygame.SRCALPHA)
+        pygame.draw.rect(card_surf,
+                         (60, 40, 10, 210) if selected else (20, 15, 5, 160),
+                         card_surf.get_rect(), border_radius=18)
+        self.screen.blit(card_surf, rect)
+        pygame.draw.rect(self.screen, border_color, rect, border_w, border_radius=18)
+
+        # Thumbnail
+        thumb = self.thumbs[idx]
+        tx = rect.x + (self.CARD_W - self.THUMB_SIZE[0]) // 2
+        ty = rect.y + 20
+        self.screen.blit(thumb, (tx, ty))
+
+        # Tên
+        draw_text_centered(self.screen, bg["name"], 26, rect.centerx,
+                           ty + self.THUMB_SIZE[1] + 12,
+                           color=(255, 220, 80) if selected else (200, 180, 120))
+
+        # Mô tả
+        draw_text_centered(self.screen, bg["desc"], 18, rect.centerx,
+                           ty + self.THUMB_SIZE[1] + 46,
+                           color=(240, 230, 200) if selected else (140, 120, 80))
+
+        # Badge
+        if selected:
+            badge_y = rect.bottom - 44
+            pygame.draw.rect(self.screen, (200, 160, 20),
+                             (rect.x + 60, badge_y, self.CARD_W - 120, 32), border_radius=8)
+            draw_text_centered(self.screen, "SELECT THIS MAP", 16,
+                               rect.centerx, badge_y + 8, color=(30, 20, 5))
+
+        if not selected:
+            self.screen.blit(self.dim_overlay, rect)
+
+    def run(self):
+        """Trả về index background được chọn."""
+        while True:
+            dt = self.clock.tick(FPS)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_LEFT, pygame.K_a):
+                        self.selected = (self.selected - 1) % len(BACKGROUNDS)
+                    if event.key in (pygame.K_RIGHT, pygame.K_d):
+                        self.selected = (self.selected + 1) % len(BACKGROUNDS)
+                    if event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                        return self.selected
+                    if event.key == pygame.K_ESCAPE:
+                        return -1   # -1 = quay lại chọn nhân vật
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    for i, r in enumerate(self._card_rects()):
+                        if r.collidepoint(event.pos):
+                            if self.selected == i:
+                                return self.selected
+                            self.selected = i
+
+            # Nền (preview background đang chọn)
+            preview = try_load_image(BACKGROUNDS[self.selected]["file"],
+                                     (SCREEN_WIDTH, SCREEN_HEIGHT))
+            if preview:
+                self.screen.blit(preview, (0, 0))
+            else:
+                self.screen.fill((15, 10, 5))
+
+            overlay = pygame.Surface((self.screen_rect.width, self.screen_rect.height),
+                                     pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 130))
+            self.screen.blit(overlay, (0, 0))
+
+            self._update_particles()
+            self._draw_particles()
+
+            draw_text_centered(self.screen, "🗺  MAP  🗺", 52,
+                               self.screen_rect.centerx, 60, color=(255, 210, 60))
+            draw_text_centered(self.screen, "A W D to move   •   ENTER or Click to choose",
+                               22, self.screen_rect.centerx, 128, color=(200, 180, 130))
+
+            for i, rect in enumerate(self._card_rects()):
+                self._draw_card(i, rect, i == self.selected)
+
+            draw_text_centered(self.screen, "ESC – BACK TO CHOOSING CHARACTER", 20,
+                               self.screen_rect.centerx, self.screen_rect.bottom - 40,
+                               color=(120, 100, 70))
+
+            pygame.display.flip()
  
 # ================================================================
 #  PLAYER (nhận thêm tham số char_data)
@@ -336,8 +518,17 @@ class Player:
         if not self.frames:
             self.frames = [fallback]
  
-        self.image_parry = try_load_image(char_data["parry"], (self.width, self.height)) or fallback
- 
+        _parry_raw = try_load_image(char_data["parry"])
+        if _parry_raw:
+            orig_w, orig_h = _parry_raw.get_size()
+            scale_ratio = self.height / orig_h
+            parry_w = int(orig_w * scale_ratio)
+            self.image_parry = pygame.transform.scale(_parry_raw, (parry_w, self.height))
+            self.parry_w = parry_w          # ← THÊM DÒNG NÀY
+        else:
+            self.image_parry = fallback
+            self.parry_w = self.width       # ← THÊM DÒNG NÀY
+         
         self.image = self.image_idle
         self.anim_index = 0
         self.anim_timer = 0
@@ -396,10 +587,17 @@ class Player:
  
     def draw(self, surf):
         if self.parry_active:
-            glow = pygame.Surface((self.width + 14, self.height + 14), pygame.SRCALPHA)
+            # Glow căn giữa theo chiều rộng thực của ảnh parry
+            glow_w = self.parry_w + 14
+            glow = pygame.Surface((glow_w, self.height + 14), pygame.SRCALPHA)
             pygame.draw.ellipse(glow, (120, 200, 255, 140), glow.get_rect())
-            surf.blit(glow, (self.rect.x - 7, self.rect.y - 7))
-        surf.blit(self.image, self.rect)
+            glow_x = self.rect.centerx - glow_w // 2
+            surf.blit(glow, (glow_x, self.rect.y - 7))
+            # Vẽ ảnh parry căn giữa theo rect
+            img_x = self.rect.centerx - self.parry_w // 2
+            surf.blit(self.image_parry, (img_x, self.rect.y))
+        else:
+            surf.blit(self.image, self.rect)
  
  
 # ================================================================
@@ -553,6 +751,7 @@ def run_game(screen, bg_image, char_index):
     anim_index = 0
     anim_timer = 0
     playing_anim = False
+    anim_done = False 
  
     try:
         voice_sound = pygame.mixer.Sound(ASSET_PATH + "Thoại-260402_175139.mp3")
@@ -575,14 +774,24 @@ def run_game(screen, bg_image, char_index):
  
             if invincible:
                 invincible_timer -= dt
-                anim_timer += dt
-                if anim_timer >= ANIM_FRAME_SPEED:
-                    anim_timer = 0
-                    total = len(anim_frames) if use_image_anim else 4
-                    anim_index = (anim_index + 1) % total
+
+                # -- Giai đoạn 1: 1000ms đầu chạy animation --
+                if not anim_done:
+                    anim_timer += dt
+                    frame_duration = 1000 // len(anim_frames) if use_image_anim else 250
+                    if anim_timer >= frame_duration:
+                        anim_timer = 0
+                        total = len(anim_frames) if use_image_anim else 4
+                        anim_index = (anim_index + 1) % total
+                    # Hết 1000ms → tắt anim, vào giai đoạn 2
+                    if invincible_timer <= ITEM_DURATION - 1000:
+                        anim_done = True
+                        playing_anim = False
+
+                # -- Giai đoạn 2: 2000ms còn lại bất tử im lặng --
                 if invincible_timer <= 0:
                     invincible = False
-                    playing_anim = False
+                    anim_done = False
  
             if current_item and player.rect.colliderect(current_item.rect):
                 current_item = None
@@ -591,6 +800,7 @@ def run_game(screen, bg_image, char_index):
                 playing_anim = True
                 anim_index = 0
                 anim_timer = 0
+                anim_done = False   
                 if voice_sound:
                     voice_sound.play()
  
@@ -679,7 +889,7 @@ def run_game(screen, bg_image, char_index):
         if game_over:
             draw_text_centered(screen, "GAME OVER", 64, screen_rect.centerx, screen_rect.centery - 70, (230, 50, 50))
             draw_text_centered(screen, f"Score: {int(score)}", 36, screen_rect.centerx, screen_rect.centery + 50, (255, 220, 0))
-            draw_text_centered(screen, "R – Chơi lại   |   M – Chọn nhân vật", 28,
+            draw_text_centered(screen, "R – Restart   |   M – Choose character", 28,
                                screen_rect.centerx, screen_rect.centery + 10, (240, 240, 240))
  
         pygame.display.flip()
@@ -698,7 +908,7 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Ancient China Evade")
  
-    bg_image = try_load_image(ASSET_PATH + "Không-Có-Tiêu-Đề244.png", (SCREEN_WIDTH, SCREEN_HEIGHT))
+    bg_image = try_load_image(ASSET_PATH + "Background.png", (SCREEN_WIDTH, SCREEN_HEIGHT))
     if bg_image is None:
         bg_image = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
         bg_image.fill((20, 30, 40))
@@ -714,20 +924,34 @@ def main():
     char_index = 0
  
     while True:
-        # --- Màn hình chọn nhân vật ---
-        selector = CharacterSelectScreen(screen, bg_image)
-        char_index = selector.run()
- 
-        # --- Vòng lặp game (restart không cần chọn lại nhân vật) ---
+        # --- Bước 1: Chọn nhân vật ---
+        char_index = CharacterSelectScreen(screen, bg_image).run()
+
+        # --- Bước 2: Chọn background ---
         while True:
-            result = run_game(screen, bg_image, char_index)
-            if result == "restart":
-                continue        # chơi lại cùng nhân vật
-            elif result == "menu":
-                break           # quay về màn hình chọn nhân vật
-            else:               # "quit"
-                pygame.quit()
-                sys.exit()
+            bg_selector = BackgroundSelectScreen(screen, bg_image)
+            bg_index = bg_selector.run()
+            if bg_index == -1:
+                break   # ESC → quay lại chọn nhân vật
+
+            # Load background được chọn
+            chosen_bg = try_load_image(
+                BACKGROUNDS[bg_index]["file"], (SCREEN_WIDTH, SCREEN_HEIGHT)
+            )
+            if chosen_bg is None:
+                chosen_bg = bg_image   # fallback nếu ảnh không load được
+
+            # --- Bước 3: Vòng lặp game ---
+            while True:
+                result = run_game(screen, chosen_bg, char_index)
+                if result == "restart":
+                    continue          # chơi lại cùng nhân vật + map
+                elif result == "menu":
+                    break             # về chọn background
+                else:
+                    pygame.quit()
+                    sys.exit()
+            break   # sau game over → M thì về chọn nhân vật luôn
  
  
 if __name__ == "__main__":
