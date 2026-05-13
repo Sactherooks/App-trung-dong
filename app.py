@@ -307,7 +307,7 @@ class CharacterSelectScreen:
             # Tiêu đề
             draw_text_centered(self.screen, "⚔  CHOOSE YOUR CHARACTER  ⚔", 52,
                                self.screen_rect.centerx, 60, color=(255, 210, 60))
-            draw_text_centered(self.screen, "A W D to move   •   ENTER or Click to choose",
+            draw_text_centered(self.screen, "A D to change   •   ENTER or Click to choose",
                                22, self.screen_rect.centerx, 128, color=(200, 180, 130))
  
             # Các card nhân vật
@@ -469,7 +469,7 @@ class BackgroundSelectScreen:
 
             draw_text_centered(self.screen, "🗺  MAP  🗺", 52,
                                self.screen_rect.centerx, 60, color=(255, 210, 60))
-            draw_text_centered(self.screen, "A W D to move   •   ENTER or Click to choose",
+            draw_text_centered(self.screen, "A D to change   •   ENTER or Click to choose",
                                22, self.screen_rect.centerx, 128, color=(200, 180, 130))
 
             for i, rect in enumerate(self._card_rects()):
@@ -504,7 +504,11 @@ class Player:
         self.parry_active = False
         self.parry_timer = 0
         self.parry_cooldown = 0
- 
+        
+        self.speed_boost = False
+        self.speed_boost_timer = 0
+        self.base_speed = PLAYER_SPEED
+
         # Load ảnh theo char_data
         fallback = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         pygame.draw.rect(fallback, char_data.get("color", (20, 120, 20)),
@@ -535,6 +539,12 @@ class Player:
         self.anim_speed = 150
  
     def update(self, keys, screen_rect, dt):
+        if self.speed_boost:
+            self.speed_boost_timer = max(0, self.speed_boost_timer - dt)
+            if self.speed_boost_timer <= 0:
+                self.speed_boost = False
+                self.speed = self.base_speed
+        
         dx = 0
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             dx -= self.speed
@@ -643,7 +653,9 @@ class Projectile:
  
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.entered = False
- 
+        self.warning_timer = 0
+        self.warning_done = False
+
         self.image = try_load_image(ASSET_PATH + "Fiery katana with ethereal aura.png", (self.width, self.height))
         if self.image is None:
             self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
@@ -652,7 +664,12 @@ class Projectile:
                 [(self.width / 2, 0), (self.width, self.height), (0, self.height)],
             )
  
-    def update(self, screen_rect):
+    def update(self, screen_rect, dt):
+        if not self.warning_done:
+            self.warning_timer += dt
+            if self.warning_timer >= 1500:
+                self.warning_done = True
+            return
         self.rect.x += self.vx
         self.rect.y += self.vy
         if not self.entered and self.rect.colliderect(screen_rect):
@@ -698,23 +715,59 @@ class Item:
 #  DRAW HELPERS
 # ================================================================
  
-def draw_warning(surf, direction, screen_rect, pos):
+WARNING_IMAGE = None
+
+def get_warning_image():
+    global WARNING_IMAGE
+    if WARNING_IMAGE is None:
+        img = try_load_image(ASSET_PATH + "warning.png", (80, 80))
+        if img is None:
+            print(f"[WARNING] Không load được warning.png từ: {ASSET_PATH}warning.png")
+            # Tạo ảnh fallback hình tam giác vàng thay vì None
+            img = pygame.Surface((80, 80), pygame.SRCALPHA)
+            pygame.draw.polygon(img, (255, 200, 80),
+                                [(40, 5), (5, 75), (75, 75)])
+            pygame.draw.polygon(img, (40, 30, 0),
+                                [(40, 5), (5, 75), (75, 75)], 3)
+        WARNING_IMAGE = img
+    return WARNING_IMAGE
+
+def draw_warning(surf, direction, screen_rect, pos, blink_timer):
+    # Nhấp nháy: hiện 200ms, tắt 150ms
+    if (blink_timer // 150) % 2 == 1:
+        return
+
     size = 40
     padding = 30
-    color = (255, 200, 80)
+    img = get_warning_image()
+
     if direction == "top":
         x = clamp(pos, padding + size, screen_rect.right - padding - size)
-        pts = [(x, padding), (x - size, padding + size), (x + size, padding + size)]
+        draw_x, draw_y = x - size, padding
     elif direction == "bottom":
         x = clamp(pos, padding + size, screen_rect.right - padding - size)
-        pts = [(x, screen_rect.bottom - padding), (x - size, screen_rect.bottom - padding - size), (x + size, screen_rect.bottom - padding - size)]
+        draw_x, draw_y = x - size, screen_rect.bottom - padding - size * 2
     elif direction == "left":
         y = clamp(pos, padding + size, screen_rect.bottom - padding - size)
-        pts = [(padding, y), (padding + size, y - size), (padding + size, y + size)]
+        draw_x, draw_y = padding, y - size
     else:
         y = clamp(pos, padding + size, screen_rect.bottom - padding - size)
-        pts = [(screen_rect.right - padding, y), (screen_rect.right - padding - size, y - size), (screen_rect.right - padding - size, y + size)]
-    pygame.draw.polygon(surf, color, pts)
+        draw_x, draw_y = screen_rect.right - padding - size * 2, y - size
+
+    if img:
+        surf.blit(img, (draw_x, draw_y))
+    else:
+        # Fallback tam giác nếu không có ảnh
+        color = (255, 200, 80)
+        if direction == "top":
+            pts = [(x, padding), (x - size, padding + size), (x + size, padding + size)]
+        elif direction == "bottom":
+            pts = [(x, screen_rect.bottom - padding), (x - size, screen_rect.bottom - padding - size), (x + size, screen_rect.bottom - padding - size)]
+        elif direction == "left":
+            pts = [(padding, y), (padding + size, y - size), (padding + size, y + size)]
+        else:
+            pts = [(screen_rect.right - padding, y), (screen_rect.right - padding - size, y - size), (screen_rect.right - padding - size, y + size)]
+        pygame.draw.polygon(surf, color, pts)
  
  
 # ================================================================
@@ -752,7 +805,7 @@ def run_game(screen, bg_image, char_index):
     anim_timer = 0
     playing_anim = False
     anim_done = False 
- 
+    warn_blink_timer = 0
     try:
         voice_sound = pygame.mixer.Sound(ASSET_PATH + "Thoại-260402_175139.mp3")
         voice_sound.set_volume(1.0)
@@ -789,10 +842,16 @@ def run_game(screen, bg_image, char_index):
                         playing_anim = False
 
                 # -- Giai đoạn 2: 2000ms còn lại bất tử im lặng --
+                if char_data["id"] == "hero" and anim_done:
+                    invincible = False
+                    player.speed = player.base_speed * 3
+                    player.speed_boost = True
+                    player.speed_boost_timer = 5000
                 if invincible_timer <= 0:
                     invincible = False
                     anim_done = False
- 
+
+
             if current_item and player.rect.colliderect(current_item.rect):
                 current_item = None
                 invincible = True
@@ -800,7 +859,7 @@ def run_game(screen, bg_image, char_index):
                 playing_anim = True
                 anim_index = 0
                 anim_timer = 0
-                anim_done = False   
+                anim_done = False
                 if voice_sound:
                     voice_sound.play()
  
@@ -822,15 +881,17 @@ def run_game(screen, bg_image, char_index):
  
         if not game_over:
             player.update(keys, screen_rect, dt)
- 
+            
+            
+            
             if spawn_timer >= spawn_interval:
                 spawn_timer = 0
                 projectiles.append(Projectile(screen_rect, projectile_speed))
- 
+            warn_blink_timer += dt
             for p in projectiles:
-                p.update(screen_rect)
+                p.update(screen_rect, dt)
  
-            projectiles = [p for p in projectiles if not p.is_offscreen(screen_rect)]
+            projectiles = [p for p in projectiles if not p.warning_done or not p.is_offscreen(screen_rect)]
  
             for p in projectiles[:]:
                 player_center = pygame.Rect(
@@ -848,14 +909,15 @@ def run_game(screen, bg_image, char_index):
                     break
  
         for p in projectiles:
-            if not p.entered:
+            if not p.warning_done:
                 if p.direction in ("top", "bottom"):
-                    draw_warning(screen, p.direction, screen_rect, p.rect.centerx)
+                    draw_warning(screen, p.direction, screen_rect, p.rect.centerx, warn_blink_timer)
                 else:
-                    draw_warning(screen, p.direction, screen_rect, p.rect.centery)
+                    draw_warning(screen, p.direction, screen_rect, p.rect.centery, warn_blink_timer)
  
         for p in projectiles:
-            p.draw(screen)
+            if p.warning_done:
+                p.draw(screen)
  
         if not playing_anim:
             player.draw(screen)
@@ -884,7 +946,10 @@ def run_game(screen, bg_image, char_index):
             else:
                 draw_text(screen, "Parry: F", 22, 12, 40)
             draw_text(screen, "Jump: UP / W", 22, 12, 64)
-            draw_text(screen, "ESC – Chọn nhân vật", 20, 12, 88, color=(180, 160, 110))
+            draw_text(screen, "ESC – Choose character", 20, 12, 88, color=(180, 160, 110))
+            if char_data["id"] == "hero" and player.speed_boost:
+                draw_text(screen, f"SPEED BOOST: {player.speed_boost_timer // 1000 + 1}s",
+                    22, 12, 112, color=(255, 220, 0))
  
         if game_over:
             draw_text_centered(screen, "GAME OVER", 64, screen_rect.centerx, screen_rect.centery - 70, (230, 50, 50))
