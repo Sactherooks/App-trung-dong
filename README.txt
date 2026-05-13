@@ -2,55 +2,279 @@
         ANCIENT CHINA EVADE - HƯỚNG DẪN CÀI ĐẶT VÀ CHẠY
 ================================================================
 
+GIỚI THIỆU
+-----------
+Ancient China Evade là game né đạn phong cách hành động 2D được
+viết bằng Python và thư viện Pygame.
+
+Người chơi có thể:
+- Chọn nhân vật với kỹ năng riêng
+- Chọn bản đồ với loại obstacle khác nhau
+- Né đòn, parry và kích hoạt trạng thái thức tỉnh
+- Tăng điểm bằng cách sống sót lâu nhất có thể
+
+================================================================
 YÊU CẦU HỆ THỐNG
------------------
+================================================================
+
+- Windows 10/11
 - Python 3.8 trở lên
-- Thư viện pygame
+- RAM tối thiểu: 4GB
+- Độ phân giải khuyến nghị: 1920x1080
+- Đã cài thư viện pygame
 
-CÀI ĐẶT
---------
-1. Cài Python tại: https://www.python.org/downloads/
-   (Nhớ tích vào "Add Python to PATH" khi cài)
+================================================================
+CÀI ĐẶT PYTHON
+================================================================
 
-2. Mở Command Prompt (cmd) và chạy lệnh sau để cài pygame:
+Bước 1:
+Tải Python tại:
+https://www.python.org/downloads/
+
+Bước 2:
+Khi cài đặt:
+✓ Tick vào ô:
+    Add Python to PATH
+
+Bước 3:
+Nhấn:
+    Install Now
+
+================================================================
+CÀI ĐẶT PYGAME
+================================================================
+
+Sau khi cài Python:
+
+1. Mở Command Prompt (cmd)
+
+2. Nhập lệnh:
+
        pip install pygame
 
-3. Tải toàn bộ thư mục game về máy, đảm bảo các file sau
-   nằm CÙNG THƯ MỤC với app.py:
-       - mc_normal.png
-       - Không Có Tiêu Đề9_20260402131643.png
-       - Không Có Tiêu Đề9_20260402131649.png
-       - Không Có Tiêu Đề51_20260402134240.png
-       - Fiery katana with ethereal aura.png
-       - Không-Có-Tiêu-Đề244.png
-       - baogay.png
-       - Không Có Tiêu Đề48_202604021319xx.png (9 frames)
-       - videoplayback.mp3
-       - Thoại-260402_175139.mp3
+3. Chờ quá trình cài hoàn tất.
 
+Nếu hiện:
+       Successfully installed pygame
+=> Đã cài thành công.
+
+================================================================
+CẤU TRÚC THƯ MỤC
+================================================================
+
+Đảm bảo toàn bộ file game nằm trong cùng thư mục project.
+
+Ví dụ:
+
+App-trung-dong/
+│
+├── app.py
+├── Background.png
+├── bg phật.png
+├── bg thuyền.png
+├── videoplayback.mp3
+├── warning.png
+├── baogay.png
+│
+├── nv2/
+│   ├── Đứng.png
+│   ├── Đỡ.png
+│   ├── đứng_2.png
+│   ├── đỡ_2.png
+│   └── ...
+│
+├── bom/
+│   └── ...
+│
+└── ...
+
+================================================================
+QUAN TRỌNG - CHỈNH ĐƯỜNG DẪN ASSET
+================================================================
+
+Trong file app.py có dòng:
+
+    ASSET_PATH = "C:/Users/TBL/Documents/GitHub/App-trung-dong/"
+
+Bạn PHẢI đổi đường dẫn này thành vị trí thư mục game trên máy bạn.
+
+Ví dụ:
+
+    ASSET_PATH = "D:/Game/App-trung-dong/"
+
+Lưu ý:
+- Phải có dấu / ở cuối
+- Dùng dấu / thay vì \
+
+================================================================
 CHẠY GAME
----------
-Cách 1 - Double click:
-   Nhấp đúp vào file app.py (nếu Python đã được cài đúng)
+================================================================
 
-Cách 2 - Command Prompt:
-   cd "C:\Users\HP\OneDrive\Desktop\Code\App-trung-dong-Ngh-a"
-   python app.py
-   hoặc đổi địa chỉ location của file đã được tải trong phần app.py để tải file và âm thanh về
+CÁCH 1 - DOUBLE CLICK
+----------------------
 
+Nhấp đúp vào file:
+
+    app.py
+
+Nếu Python đã được cài đúng, game sẽ tự chạy.
+
+---------------------------------------------------------------
+
+CÁCH 2 - COMMAND PROMPT
+------------------------
+
+1. Mở Command Prompt
+
+2. Di chuyển tới thư mục game:
+
+       cd "D:\Game\App-trung-dong"
+
+3. Chạy game:
+
+       python app.py
+
+Hoặc:
+
+       py app.py
+
+================================================================
 ĐIỀU KHIỂN
-----------
-   Di chuyển trái/phải  :  Phím mũi tên ← → hoặc A / D
-   Nhảy                 :  Phím mũi tên ↑ hoặc W
-   Parry (đỡ đòn)       :  Phím F
-   Thoát game           :  ESC
-   Chơi lại (game over) :  R
+================================================================
 
-MỤC TIÊU
+DI CHUYỂN
+-----------
+← → hoặc A / D
+Di chuyển trái/phải
+
+NHẢY
+------
+↑ hoặc W
+
+PARRY / ĐỠ ĐÒN
+----------------
+F
+
+THOÁT / QUAY LẠI MENU
+----------------------
+ESC
+
+CHƠI LẠI KHI THUA
+------------------
+R
+
+================================================================
+NHÂN VẬT
+================================================================
+
+1. MONK
 --------
-- Tránh các vũ khí rơi xuống từ mọi hướng.
-- Nhặt item bất tử (xuất hiện mỗi 10 giây) để được miễn sát thương 3 giây.
-- Dùng Parry để đỡ và tiêu diệt vũ khí, cộng thêm điểm.
-- Sống càng lâu, điểm càng cao!
+- Nhân vật cân bằng
+- Dễ chơi
+- Sau khi nhặt item:
+    + Hiệu ứng toàn màn hình
+    + Tăng tốc độ di chuyển
 
+2. LIU XUANJI
+--------------
+- Nhân vật tốc độ cao
+- Có trạng thái thức tỉnh
+
+Khi nhặt item:
+    + Chuyển sang awakened form
+    + Được bất tử tạm thời
+    + Thay đổi animation và sprite
+
+================================================================
+CÁC BẢN ĐỒ
+================================================================
+
+1. ELYSIUM OF CHERRY BLOSSOMS
+--------------------------------
+Obstacle:
+- Katana từ nhiều hướng
+
+2. ABYSS OF THE FORGOTTEN SHRINE
+---------------------------------
+Obstacle:
+- Bùa talisman xoay tốc độ cao
+
+3. THE GLORY OF CRIMSON BANNER
+--------------------------------
+Obstacle:
+- Cannonball phát nổ giữa map
+
+================================================================
+MỤC TIÊU GAME
+================================================================
+
+- Né obstacle càng lâu càng tốt
+- Sử dụng Parry để phá obstacle
+- Nhặt item bất tử xuất hiện định kỳ
+- Tăng điểm bằng cách sống sót lâu hơn
+
+================================================================
+TÍNH NĂNG ĐẶC BIỆT
+================================================================
+
+✓ Character Selection Screen
+✓ Map Selection Screen
+✓ Animation hệ thống
+✓ Awakened Transformation
+✓ Explosion Effects
+✓ Particle Effects
+✓ Parry System
+✓ Speed Boost
+✓ Dynamic Obstacles
+✓ Sound Effects & Music
+
+================================================================
+LỖI THƯỜNG GẶP
+================================================================
+
+1. ModuleNotFoundError: No module named 'pygame'
+--------------------------------------------------
+
+Nguyên nhân:
+Chưa cài pygame
+
+Cách sửa:
+    pip install pygame
+
+--------------------------------------------------
+
+2. FileNotFoundError
+---------------------
+
+Nguyên nhân:
+Sai đường dẫn ASSET_PATH
+hoặc thiếu file ảnh / âm thanh
+
+Cách sửa:
+- Kiểm tra ASSET_PATH
+- Kiểm tra file có đúng vị trí không
+
+--------------------------------------------------
+
+3. Game mở rồi tự tắt
+----------------------
+
+Nguyên nhân:
+Thiếu asset hoặc lỗi pygame
+
+Cách sửa:
+- Chạy bằng cmd để xem lỗi
+- Kiểm tra toàn bộ file asset
+
+================================================================
+GỢI Ý
+================================================================
+
+- Nên chơi fullscreen hoặc màn hình lớn
+- Dùng tai nghe để trải nghiệm âm thanh tốt hơn
+- Archer phù hợp người chơi phản xạ nhanh
+- Monk phù hợp người mới bắt đầu
+
+================================================================
+        CHÚC BẠN CHƠI GAME VUI VẺ!
 ================================================================
